@@ -1,15 +1,15 @@
-apply plugin: 'java'
-apply plugin: 'maven'
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
 
-version = System.getenv("MAVEN_UPLOAD_VERSION")
+version = 'version.goes.here'
 
 sourceCompatibility = JavaVersion.VERSION_1_6
 targetCompatibility = JavaVersion.VERSION_1_6
 
+ext.jacksonDatabindVersion = '2.9.5'
+
 repositories {
-    mavenLocal()
-    maven { url 'http://files.couchbase.com/maven2/' }
-    mavenCentral()
+    jcenter()
 }
 
 sourceSets {
@@ -18,84 +18,45 @@ sourceSets {
                 'src/main/java',
                 'vendor/sqlite/src/java'
         ]
-        resources {
-            srcDir 'src/resources'
-        }
     }
 }
 
 dependencies {
-    compile 'com.squareup.okhttp3:okhttp:3.11.0'
-    compile 'com.fasterxml.jackson.core:jackson-core:2.5.0'
-    compile 'com.fasterxml.jackson.core:jackson-annotations:2.5.0'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.5.0'
-    compile 'com.github.oxo42:stateless4j:2.4.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+    implementation "com.fasterxml.jackson.core:jackson-core:$jacksonDatabindVersion"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonDatabindVersion"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
+    implementation 'com.github.oxo42:stateless4j:2.4.0'
 }
 
-task createMavenDirectory(type: Exec) {
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'group.id'
+            artifactId = 'artifact-id'
+            version = "$version"
 
-    ext {
-        uploadUser = System.getenv("MAVEN_UPLOAD_USERNAME") + ":" + System.getenv("MAVEN_UPLOAD_PASSWORD")
-        mkcolPath = System.getenv("MAVEN_UPLOAD_REPO_URL") + "com/couchbase/lite/couchbase-lite-java-core/" + version + "/"
+            from components.java
+            artifact sourceJar
+        }
     }
-    commandLine "curl", "--user", uploadUser, "-X", "MKCOL", mkcolPath
-}
 
-// this hack is only needed for apache mod_dav based Maven repo's like file.couchbase.com.  otherwise, skip it
-createMavenDirectory.onlyIf { System.getenv("MAVEN_UPLOAD_REPO_URL").contains("files") }
-
-// first create the directory, then do the upload
-task uploadArchivesWrapper(dependsOn: createMavenDirectory) << {
-    uploadArchives.execute()
-}
-
-// this will upload, but will not first create a directory (which is needed on some servers)
-uploadArchives {
     repositories {
-        mavenDeployer {
-            repository(url: System.getenv("MAVEN_UPLOAD_REPO_URL")) {
-                authentication(userName: System.getenv("MAVEN_UPLOAD_USERNAME"), password: System.getenv("MAVEN_UPLOAD_PASSWORD"))
+        maven {
+            credentials {
+                username "user"
+                password "pass"
             }
-            pom.version = version
-            pom.groupId = 'com.couchbase.lite'
-            pom.artifactId = 'couchbase-lite-java-core'
-            pom.project {
-                name 'com.couchbase.lite:couchbase-lite-java-core'
-                description 'Couchbase Lite Java core library'
-                url 'http://developer.couchbase.com/mobile/'
-                licenses {
-                    license {
-                        name 'Couchbase, Inc. Community Edition License Agreement'
-                        url 'https://www.couchbase.com/binaries/content/assets/website/legal/ce-license-agreement.pdf'
-                        distribution 'repo'
-                    }   
-                }   
-                scm {
-                    url 'git@github.com:couchbase/couchbase-lite-java-core.git'
-                }   
-                developers {
-                    developer {
-                        name 'Couchbase Mobile'
-                        email 'mobile@couchbase.com'
-                        organization 'Couchbase'
-                        organizationUrl 'http://www.couchbase.com'
-                    }   
-               }   
-            }
+            url "https://your-repo-here.com/"
         }
     }
 }
 
-task generateJavadocs(type: Javadoc) {
-    source = sourceSets.main.java.srcDirs
-    exclude "org/apache/http/**"
-}
-
-task sourcesJar(type: Jar, dependsOn: classes) {
+task sourceJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.java.srcDirs
 }
 
 artifacts {
-    archives sourcesJar
+    archives sourceJar
 }
