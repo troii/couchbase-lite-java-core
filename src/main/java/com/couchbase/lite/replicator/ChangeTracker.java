@@ -191,26 +191,25 @@ public class ChangeTracker implements Runnable {
             filterParams = new HashMap<String, Object>();
             filterParams.put("doc_ids", docIDs);
         }
-        if (!usePOST) {
-            // Add filter or doc_ids to URL. If sending a POST, these will go in the JSON body instead.
-            if (filterName != null) {
-                sb.append("&filter=");
-                sb.append(URLEncoder.encode(filterName));
-                if (filterParams != null) {
-                    for (String key : filterParams.keySet()) {
-                        Object value = filterParams.get(key);
-                        if (!(value instanceof String)) {
-                            try {
-                                value = Manager.getObjectMapper().writeValueAsString(value);
-                            } catch (JsonProcessingException e) {
-                                throw new IllegalArgumentException(e);
-                            }
+
+        // Add filter or doc_ids to URL. If sending a POST, these will go in the JSON body instead.
+        if (filterName != null) {
+            sb.append("&filter=");
+            sb.append(URLEncoder.encode(filterName));
+            if (filterParams != null) {
+                for (String key : filterParams.keySet()) {
+                    Object value = filterParams.get(key);
+                    if (!(value instanceof String)) {
+                        try {
+                            value = Manager.getObjectMapper().writeValueAsString(value);
+                        } catch (JsonProcessingException e) {
+                            throw new IllegalArgumentException(e);
                         }
-                        sb.append("&");
-                        sb.append(URLEncoder.encode(key));
-                        sb.append("=");
-                        sb.append(URLEncoder.encode(value.toString()));
                     }
+                    sb.append("&");
+                    sb.append(URLEncoder.encode(key));
+                    sb.append("=");
+                    sb.append(URLEncoder.encode(value.toString()));
                 }
             }
         }
@@ -321,7 +320,7 @@ public class ChangeTracker implements Runnable {
                 builder.header("Content-Type", "application/json")
                         .addHeader("User-Agent", Manager.getUserAgent())
                         .addHeader("Accept-Encoding", "gzip")
-                        .post(RequestBody.create(JSON, changesFeedPOSTBody()));
+                        .post(RequestBody.create(null, new byte[0]));
             }
             addRequestHeaders(builder);
 
