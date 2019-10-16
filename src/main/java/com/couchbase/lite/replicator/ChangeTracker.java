@@ -191,11 +191,11 @@ public class ChangeTracker implements Runnable {
             filterParams = new HashMap<String, Object>();
             filterParams.put("doc_ids", docIDs);
         }
-        if (filterName != null) {
-            sb.append("&filter=");
-            sb.append(URLEncoder.encode(filterName));
-            if (!usePOST) {
-                // Add filter or doc_ids to URL. If sending a POST, these will go in the JSON body instead.
+        if (!usePOST) {
+            // Add filter or doc_ids to URL. If sending a POST, these will go in the JSON body instead.
+            if (filterName != null) {
+                sb.append("&filter=");
+                sb.append(URLEncoder.encode(filterName));
                 if (filterParams != null) {
                     for (String key : filterParams.keySet()) {
                         Object value = filterParams.get(key);
