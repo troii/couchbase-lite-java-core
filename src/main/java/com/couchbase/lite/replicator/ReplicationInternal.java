@@ -111,6 +111,7 @@ abstract class ReplicationInternal implements BlockingQueueListener {
     private String username;
     protected String filterName;
     protected Map<String, Object> filterParams;
+    protected boolean usePOST;
     protected List<String> documentIDs;
     private String remoteUUID;
     protected Map<String, Object> requestHeaders;
@@ -1110,6 +1111,9 @@ abstract class ReplicationInternal implements BlockingQueueListener {
         this.filterName = filterName;
     }
 
+    public void setUsePOST(final boolean usePOST){
+        this.usePOST = usePOST;
+    }
     /**
      * Get replicator filter. If the replicator is a pull replicator,
      * calling this method will return null.

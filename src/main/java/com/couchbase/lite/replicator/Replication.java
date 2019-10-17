@@ -726,6 +726,9 @@ public class Replication
         replicationInternal.setFilter(filterName);
     }
 
+    public void setUsePOST(final boolean usePOST){
+        replicationInternal.setUsePOST(usePOST);
+    }
     /**
      * Sets the documents to specify as part of the replication.
      */
