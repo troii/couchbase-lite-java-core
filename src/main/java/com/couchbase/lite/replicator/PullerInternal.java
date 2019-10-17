@@ -181,6 +181,7 @@ public class PullerInternal extends ReplicationInternal implements ChangeTracker
                 changeTracker.setFilterParams(filterParams);
             }
         }
+        changeTracker.setUsePOST(false);
         changeTracker.setDocIDs(documentIDs);
         changeTracker.setRequestHeaders(requestHeaders);
         changeTracker.setContinuous(lifecycle == Replication.Lifecycle.CONTINUOUS);
