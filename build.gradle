@@ -1,15 +1,11 @@
-apply plugin: 'java'
-apply plugin: 'maven'
-
-version = System.getenv("MAVEN_UPLOAD_VERSION")
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
 
 sourceCompatibility = JavaVersion.VERSION_1_6
 targetCompatibility = JavaVersion.VERSION_1_6
 
 repositories {
-    mavenLocal()
-    maven { url 'http://files.couchbase.com/maven2/' }
-    mavenCentral()
+    jcenter()
 }
 
 sourceSets {
@@ -18,82 +14,45 @@ sourceSets {
                 'src/main/java',
                 'vendor/sqlite/src/java'
         ]
-        resources {
-            srcDir 'src/resources'
-        }
     }
 }
+
+def jacksonDatabindVersion = '2.5.0'
 
 dependencies {
-    compile 'com.squareup.okhttp3:okhttp:3.11.0'
-    compile 'com.fasterxml.jackson.core:jackson-core:2.5.0'
-    compile 'com.fasterxml.jackson.core:jackson-annotations:2.5.0'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.5.0'
-    compile 'com.github.oxo42:stateless4j:2.4.0'
-}
-
-task createMavenDirectory(type: Exec) {
-
-    ext {
-        uploadUser = System.getenv("MAVEN_UPLOAD_USERNAME") + ":" + System.getenv("MAVEN_UPLOAD_PASSWORD")
-        mkcolPath = System.getenv("MAVEN_UPLOAD_REPO_URL") + "com/couchbase/lite/couchbase-lite-java-core/" + version + "/"
-    }
-    commandLine "curl", "--user", uploadUser, "-X", "MKCOL", mkcolPath
-}
-
-// this hack is only needed for apache mod_dav based Maven repo's like file.couchbase.com.  otherwise, skip it
-createMavenDirectory.onlyIf { System.getenv("MAVEN_UPLOAD_REPO_URL").contains("files") }
-
-// first create the directory, then do the upload
-task uploadArchivesWrapper(dependsOn: createMavenDirectory) << {
-    uploadArchives.execute()
-}
-
-// this will upload, but will not first create a directory (which is needed on some servers)
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: System.getenv("MAVEN_UPLOAD_REPO_URL")) {
-                authentication(userName: System.getenv("MAVEN_UPLOAD_USERNAME"), password: System.getenv("MAVEN_UPLOAD_PASSWORD"))
-            }
-            pom.version = version
-            pom.groupId = 'com.couchbase.lite'
-            pom.artifactId = 'couchbase-lite-java-core'
-            pom.project {
-                name 'com.couchbase.lite:couchbase-lite-java-core'
-                description 'Couchbase Lite Java core library'
-                url 'http://developer.couchbase.com/mobile/'
-                licenses {
-                    license {
-                        name 'Couchbase, Inc. Community Edition License Agreement'
-                        url 'https://www.couchbase.com/binaries/content/assets/website/legal/ce-license-agreement.pdf'
-                        distribution 'repo'
-                    }   
-                }   
-                scm {
-                    url 'git@github.com:couchbase/couchbase-lite-java-core.git'
-                }   
-                developers {
-                    developer {
-                        name 'Couchbase Mobile'
-                        email 'mobile@couchbase.com'
-                        organization 'Couchbase'
-                        organizationUrl 'http://www.couchbase.com'
-                    }   
-               }   
-            }
-        }
-    }
-}
-
-task generateJavadocs(type: Javadoc) {
-    source = sourceSets.main.java.srcDirs
-    exclude "org/apache/http/**"
+    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+    implementation "com.fasterxml.jackson.core:jackson-core:$jacksonDatabindVersion"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonDatabindVersion"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
+    implementation 'com.github.oxo42:stateless4j:2.4.0'
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
+    classifier 'sources'
     from sourceSets.main.java.srcDirs
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'com.troii'
+            artifactId = 'couchbase-lite-java-core'
+            version = "1.4.5"
+
+            from components.java
+            artifact sourcesJar
+        }
+    }
+
+    repositories {
+        maven {
+            credentials {
+                username nexusTroiiNetUser
+                password nexusTroiiNetPassword
+            }
+            url "https://nexus.troii.net/content/repositories/releases/"
+        }
+    }
 }
 
 artifacts {
