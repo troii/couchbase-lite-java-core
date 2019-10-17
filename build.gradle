@@ -37,7 +37,7 @@ publishing {
         maven(MavenPublication) {
             groupId = 'com.troii'
             artifactId = 'couchbase-lite-java-core'
-            version = "1.4.6"
+            version = "1.4.5"
 
             from components.java
             artifact sourcesJar
