@@ -24,7 +24,6 @@ node(label: "jdk11") {
 			if (currentBuild.result == null) {
 				if (params.PUBLISH_JOB) {
 					sh "./gradlew publish"
-					slack("good", "Publishing libraries for ${currentBuild.fullDisplayName} finished")
 				}
 			}
 		}
