@@ -21,8 +21,8 @@ node(label: "jdk11") {
 		}
 
 		stage("Publish") {
-			if (currentBuild.result == null || BRANCH_NAME == "master") {
-				if (params.PUBLISH_JOB) {
+			if (currentBuild.result == null) {
+				if (params.PUBLISH_JOB || BRANCH_NAME == "master") {
 					sh "./gradlew publish"
 				}
 			}
