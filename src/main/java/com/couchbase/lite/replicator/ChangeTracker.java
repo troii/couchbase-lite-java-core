@@ -164,8 +164,7 @@ public class ChangeTracker implements Runnable {
         // filter-related params go in the body.
         // (See https://github.com/couchbase/couchbase-lite-ios/issues/1139)
         StringBuilder sb = new StringBuilder(String.format(Locale.ENGLISH, "_changes?feed=%s&heartbeat=%d", getFeed(), getHeartbeatMilliseconds()));
-        if (includeConflicts)
-            sb.append("&style=all_docs");
+            sb.append("&style=main_only");
         Object seq = lastSequenceID;
         if (seq != null) {
             if (seq instanceof List || seq instanceof Map) {
