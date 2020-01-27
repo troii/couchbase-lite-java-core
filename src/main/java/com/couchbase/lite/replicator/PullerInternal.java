@@ -171,7 +171,7 @@ public class PullerInternal extends ReplicationInternal implements ChangeTracker
 
         Log.d(TAG, "%s: starting ChangeTracker with since=%s mode=%s",
                 this, lastSequence, changeTrackerMode);
-        changeTracker = new ChangeTracker(remote, changeTrackerMode, true, lastSequence, this);
+        changeTracker = new ChangeTracker(remote, changeTrackerMode, false, lastSequence, this);
         changeTracker.setAuthenticator(getAuthenticator());
         Log.d(TAG, "%s: started ChangeTracker %s", this, changeTracker);
 
