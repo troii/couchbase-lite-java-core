@@ -164,9 +164,13 @@ public class ChangeTracker implements Runnable {
         // filter-related params go in the body.
         // (See https://github.com/couchbase/couchbase-lite-ios/issues/1139)
         StringBuilder sb = new StringBuilder(String.format(Locale.ENGLISH, "_changes?feed=%s&heartbeat=%d", getFeed(), getHeartbeatMilliseconds()));
-        if (includeConflicts)
-            sb.append("&style=all_docs");
+        sb.append("&style=main_only");
         Object seq = lastSequenceID;
+        if (mode == ChangeTrackerMode.OneShot) {
+            filterName = "replication/initial";
+        } else {
+            filterName = null;
+        }
         if (seq != null) {
             if (seq instanceof List || seq instanceof Map) {
                 try {
@@ -177,9 +181,6 @@ public class ChangeTracker implements Runnable {
             sb.append("&since=");
             sb.append(URLEncoder.encode(seq.toString()));
         }
-        if (activeOnly && !caughtUp)
-            // On first replication we can skip getting deleted docs. (SG enhancement in ver. 1.2)
-            sb.append("&active_only=true");
         if (limit > 0) {
             sb.append("&limit=");
             sb.append(limit);
@@ -619,8 +620,6 @@ public class ChangeTracker implements Runnable {
         post.put("heartbeat", getHeartbeatMilliseconds());
         if (includeConflicts)
             post.put("style", "all_docs");
-        if (activeOnly && !caughtUp)
-            post.put("active_only", true);
         if (since != null)
             post.put("since", since);
         if (filterName != null)
