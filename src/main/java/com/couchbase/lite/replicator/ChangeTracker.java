@@ -71,6 +71,7 @@ public class ChangeTracker implements Runnable {
 
     private ChangeTrackerMode mode;
     private String filterName;
+    private String continuousFilterName;
     private Map<String, Object> filterParams;
     private int limit;
     private int heartBeatSeconds;
@@ -121,6 +122,10 @@ public class ChangeTracker implements Runnable {
         this.filterName = filterName;
     }
 
+    public void setContinuousFilterName(String filterName) {
+        this.continuousFilterName = filterName;
+    }
+
     public void setFilterParams(Map<String, Object> filterParams) {
         this.filterParams = filterParams;
     }
@@ -166,11 +171,7 @@ public class ChangeTracker implements Runnable {
         StringBuilder sb = new StringBuilder(String.format(Locale.ENGLISH, "_changes?feed=%s&heartbeat=%d", getFeed(), getHeartbeatMilliseconds()));
         sb.append("&style=main_only");
         Object seq = lastSequenceID;
-        if (mode == ChangeTrackerMode.OneShot) {
-            filterName = "replication/initial";
-        } else {
-            filterName = null;
-        }
+
         if (seq != null) {
             if (seq instanceof List || seq instanceof Map) {
                 try {
@@ -192,9 +193,9 @@ public class ChangeTracker implements Runnable {
             filterParams = new HashMap<String, Object>();
             filterParams.put("doc_ids", docIDs);
         }
-        if (filterName != null) {
+        if (filterName != null || continuousFilterName != null) {
             sb.append("&filter=");
-            sb.append(URLEncoder.encode(filterName));
+            sb.append(URLEncoder.encode(mode == ChangeTrackerMode.LongPoll ? continuousFilterName : filterName));
             if (!usePOST) {
                 // Add filter or doc_ids to URL. If sending a POST, these will go in the JSON body instead.
                 if (filterParams != null) {

@@ -110,6 +110,7 @@ abstract class ReplicationInternal implements BlockingQueueListener {
     protected boolean authenticating = false;
     private String username;
     protected String filterName;
+    protected String continuousFilterName;
     protected Map<String, Object> filterParams;
     protected boolean usePOST;
     protected List<String> documentIDs;
@@ -1109,6 +1110,10 @@ abstract class ReplicationInternal implements BlockingQueueListener {
 
     public void setFilter(String filterName) {
         this.filterName = filterName;
+    }
+
+    public void setContinuousFilter(String filterName){
+        this.continuousFilterName = filterName;
     }
 
     public void setUsePOST(final boolean usePOST){
