@@ -1005,6 +1005,9 @@ public class Replication
         for (ReplicationField key : properties.keySet()) {
             Object value = properties.get(key);
             switch (key) {
+                case CONTINUOUS_FILTER_NAME:
+                    replicationInternal.setContinuousFilter((String) value);
+                    break;
                 case FILTER_NAME:
                     replicationInternal.setFilter((String) value);
                     break;
