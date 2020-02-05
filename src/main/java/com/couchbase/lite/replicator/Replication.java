@@ -110,6 +110,7 @@ public class Replication
 
     public enum ReplicationField {
         FILTER_NAME,
+        CONTINUOUS_FILTER_NAME,
         FILTER_PARAMS,
         DOC_IDS,
         REQUEST_HEADERS,
@@ -726,6 +727,15 @@ public class Replication
         replicationInternal.setFilter(filterName);
     }
 
+    /**
+     * Set the filter to be used by this replication
+     */
+    @InterfaceAudience.Public
+    public void setContinuousFilter(String filterName) {
+        properties.put(ReplicationField.CONTINUOUS_FILTER_NAME, filterName);
+        replicationInternal.setContinuousFilter(filterName);
+    }
+
     public void setUsePOST(final boolean usePOST){
         replicationInternal.setUsePOST(usePOST);
     }
@@ -995,6 +1005,9 @@ public class Replication
         for (ReplicationField key : properties.keySet()) {
             Object value = properties.get(key);
             switch (key) {
+                case CONTINUOUS_FILTER_NAME:
+                    replicationInternal.setContinuousFilter((String) value);
+                    break;
                 case FILTER_NAME:
                     replicationInternal.setFilter((String) value);
                     break;

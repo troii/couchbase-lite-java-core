@@ -181,6 +181,9 @@ public class PullerInternal extends ReplicationInternal implements ChangeTracker
                 changeTracker.setFilterParams(filterParams);
             }
         }
+        if (continuousFilterName != null) {
+            changeTracker.setContinuousFilterName(continuousFilterName);
+        }
         changeTracker.setUsePOST(false);
         changeTracker.setDocIDs(documentIDs);
         changeTracker.setRequestHeaders(requestHeaders);
@@ -969,7 +972,7 @@ public class PullerInternal extends ReplicationInternal implements ChangeTracker
                 Log.e(TAG, "Unknown lifecycle: %s", lifecycle);
         }
     }
-    
+
     private void waitForPendingFuturesWithNewThread() {
         String threadName = String.format(Locale.ENGLISH, "Thread-waitForPendingFutures[%s]", toString());
         new Thread(new Runnable() {
